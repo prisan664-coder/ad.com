@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="lo">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ປີມ້າຄຳ 2026 - ຮ້ານແແປງໂທລະສັບຟູຈິໂມບາຍ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Lao', sans-serif;
+            background-color: #000;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            pointer-events: none;
+            padding-top: 80px;
+            padding-bottom: 50px;
+        }
+
+        .interactive-elements {
+            pointer-events: auto;
+        }
+
+        .gold-gradient {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(184, 134, 11, 0.7));
+        }
+
+        .lao-flag {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 70px;
+            z-index: 30;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+            border-radius: 4px;
+        }
+
+        /* --- Dropdown Language Styles --- */
+        .lang-dropdown-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        .lang-main-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: #fcf6ba;
+            border: 2px solid #bf953f;
+            padding: 8px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(191, 149, 63, 0.3);
+        }
+
+        .lang-main-btn:hover {
+            background: rgba(191, 149, 63, 0.2);
+        }
+
+        .lang-list {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid #bf953f;
+            border-radius: 12px;
+            min-width: 140px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-list.show {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .lang-option {
+            padding: 12px 16px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 1px solid rgba(191, 149, 63, 0.1);
+        }
+
+        .lang-option:last-child {
+            border-bottom: none;
+        }
+
+        .lang-option:hover {
+            background: #bf953f;
+            color: black;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Wheel Styles --- */
+        .wheel-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin-top: 30px;
+            pointer-events: auto;
+        }
+
+        #wheel-canvas {
+            position: relative;
+            z-index: 11;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid #bf953f;
+            box-shadow: 0 0 40px rgba(191, 149, 63, 0.6);
+            background: #fff;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #ff0000;
+            z-index: 25;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        .spin-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #fcf6ba, #bf953f);
+            border: 4px solid #fff;
+            border-radius: 50%;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        #prize-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.95);
+            border: 5px solid #bf953f;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 0 100px rgba(191, 149, 63, 0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        #prize-modal.show {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .close-modal {
+            margin-top: 20px;
+            background: linear-gradient(to right, #bf953f, #aa771c);
+            color: black;
+            font-weight: bold;
+            padding: 12px 35px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="lang-dropdown-container">
+        <button class="lang-main-btn" onclick="toggleLangList()">
+            <span>🌐</span>
+            <span id="current-lang-label">ພາສາ / Language</span>
+            <span>▼</span>
+        </button>
+        <div class="lang-list" id="langList">
+            <div class="lang-option" onclick="selectLanguage('lo')">🇱🇦 ພາສາລາວ</div>
+            <div class="lang-option" onclick="selectLanguage('th')">🇹🇭 ภาษาไทย</div>
+            <div class="lang-option" onclick="selectLanguage('en')">🇺🇸 English</div>
+            <div class="lang-option" onclick="selectLanguage('vn')">🇻🇳 Tiếng Việt</div>
+        </div>
+    </div>
+
+    <div class="lao-flag">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600">
+            <rect fill="#ce1126" width="1000" height="600" />
+            <rect fill="#002868" y="150" width="1000" height="300" />
+            <circle fill="#ffffff" cx="500" cy="300" r="120" />
+        </svg>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="content-overlay text-center px-4">
+        <h1 id="main-title" class="text-5xl md:text-7xl font-bold mb-6 gold-gradient animate-float">
+            ສະບາຍດີປີໃຫມ່ ປີມ້າຄຳ 2026
+        </h1>
+        <p id="main-desc"
+            class="text-lg md:text-xl text-white mb-8 max-w-3xl font-bold drop-shadow-[0_2px_15px_rgba(0,0,0,1)]">
+            ກ້າວໄປຂ້າງໜ້າຢ່າງວ່ອງໄວ ແລະ ໝັ້ນຄົງ ໄປກັບພວກເຮົາຮ້ານແປງໂທລະສັບຟູຈິໂມບາຍ
+        </p>
+
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheel-canvas" width="500" height="500"></canvas>
+            <button id="spin-btn-label" class="spin-button" onclick="spinWheel()">ໝຸນ<br>SPIN</button>
+        </div>
+
+        <div class="interactive-elements mt-8">
+            <button id="firework-btn" onclick="createSpecialFirework()"
+                class="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 text-lg">
+                ຮັບພອນປີໃໝ່ 🧧
+            </button>
+        </div>
+    </div>
+
+    <div id="prize-modal">
+        <h2 id="modal-title" class="text-3xl font-bold gold-gradient mb-4">ຍິນດີດ້ວຍ! 🎉</h2>
+        <p id="modal-label" class="text-xl mb-2 text-gray-300">ທ່ານໄດ້ຮັບລາງວັນ:</p>
+        <div id="prize-text" class="text-4xl font-bold text-white my-6 drop-shadow-lg">---</div>
+        <button id="modal-close-btn" class="close-modal" onclick="closeModal()">ຕົກລົງ</button>
+    </div>
+
+    <script>
+        // --- Language Dropdown Logic ---
+        function toggleLangList() {
+            document.getElementById('langList').classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function (event) {
+            if (!event.target.closest('.lang-dropdown-container')) {
+                document.getElementById('langList').classList.remove('show');
+            }
+        }
+
+        function selectLanguage(lang) {
+            changeLanguage(lang);
+            document.getElementById('langList').classList.remove('show');
+        }
+
+        // --- Translations Data ---
+        const translations = {
+            lo: {
+                title: "ສະບາຍດີປີໃຫມ່ ປີມ້າຄຳ 2026",
+                desc: "ກ້າວໄປຂ້າງໜ້າຢ່າງວ່ອງໄວ ແລະ ໝັ້ນຄົງ ໄປກັບພວກເຮົາຮ້ານແປງໂທລະສັບຟູຈິໂມບາຍ",
+                spin: "ໝຸນ<br>SPIN",
+                firework: "ຮັບພອນປີໃໝ່ 🧧",
+                win: "ຍິນດີດ້ວຍ! 🎉",
+                wonLabel: "ທ່ານໄດ້ຮັບລາງວັນ:",
+                ok: "ຕົກລົງ"
+            },
+            th: {
+                title: "สวัสดีปีใหม่ ปีม้าทอง 2026",
+                desc: "ก้าวไปข้างหน้าอย่างรวดเร็วและมั่นคง ไปกับเราที่ร้านซ่อมโทรศัพท์ฟูจิโมบาย",
+                spin: "หมุน<br>SPIN",
+                firework: "รับพรปีใหม่ 🧧",
+                win: "ยินดีด้วย! 🎉",
+                wonLabel: "คุณได้รับรางวัล:",
+                ok: "ตกลง"
+            },
+            en: {
+                title: "Happy New Year 2026",
+                desc: "Moving forward fast and steady with Fuji Mobile Phone Repair Shop",
+                spin: "SPIN",
+                firework: "Get Blessing 🧧",
+                win: "Congratulations! 🎉",
+                wonLabel: "You won:",
+                ok: "OK"
+            },
+            vn: {
+                title: "Chúc Mừng Năm Mới 2026",
+                desc: "Tiến lên nhanh chóng và bền vững cùng cửa hàng sửa chữa điện thoại Fuji Mobile",
+                spin: "QUAY",
+                firework: "Nhận Lời Chúc 🧧",
+                win: "Chúc mừng! 🎉",
+                wonLabel: "Bạn đã trúng:",
+                ok: "Đồng ý"
+            }
+        };
+
+        function changeLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('main-title').innerText = t.title;
+            document.getElementById('main-desc').innerText = t.desc;
+            document.getElementById('spin-btn-label').innerHTML = t.spin;
+            document.getElementById('firework-btn').innerText = t.firework;
+            document.getElementById('modal-title').innerText = t.win;
+            document.getElementById('modal-label').innerText = t.wonLabel;
+            document.getElementById('modal-close-btn').innerText = t.ok;
+        }
+
+        // --- Visual Effects & Canvas (Money & Fireworks) ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, fireworks = [], moneyParticles = [], assetsLoaded = 0;
+        const imgUrls = [
+            'https://upload.wikimedia.org/wikipedia/commons/c/c7/100.000_Laotian_kip_in_2020_Obverse.jpg',
+            'https://img.kapook.com/u/ratthakorn/aec/aecmoney04.jpg',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS86M2CTbCdHEEN6xzHIUrhYLmugKyHwaVZbw&s',
+            'https://i.colnect.net/f/706/021/20000-Kip.jpg',
+            'https://uaedubai-bucket.s3.me-central-1.amazonaws.com/wp-content/uploads/2024/01/Apple-iPhone-15-Pro-Max-Natural-Titanium_uaedubai-ae_3.jpg',
+            'https://imgd.aeplcdn.com/664x374/cw/ec/10219/Toyota-Land-Cruiser-Prado-Exterior-127835.jpg?wm=0&q=80',
+            'https://www.leftovercurrency.com/app/uploads/2019/03/500000-vietnamese-dong-banknote-obverse-1.jpg',
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Usdollar100front.jpg/1024px-Usdollar100front.jpg',
+            'https://www.leftovercurrency.com/app/uploads/2019/07/1000-thai-baht-banknote-vajiralongkorn-rama-x-obverse-1.jpg',
+            'https://imageio.forbes.com/specials-images/imageserve/620b78a7ef638ea2cebf109c/Close-Up-Of-Ingots-Over-White-Background/0x0.jpg?format=jpg&width=480',
+        ];
+        const billImages = [];
+        imgUrls.forEach(url => {
+            const img = new Image(); img.src = url;
+            img.onload = () => { assetsLoaded++; if (assetsLoaded === imgUrls.length) init(); };
+            billImages.push(img);
+        });
+
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+
+        class Money {
+            constructor() { this.reset(); }
+            reset() {
+                this.img = billImages[Math.floor(Math.random() * billImages.length)];
+                this.x = Math.random() * width; this.y = -200 - Math.random() * 500;
+                this.sizeW = 70 + Math.random() * 50; this.sizeH = this.sizeW * 0.48;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.03;
+                this.velY = 1.5 + Math.random() * 2; this.opacity = 0;
+            }
+            update() {
+                this.y += this.velY; this.rotation += this.rotationSpeed;
+                if (this.opacity < 1) this.opacity += 0.02;
+                if (this.y > height + 200) this.reset();
+            }
+            draw() {
+                ctx.save(); ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y); ctx.rotate(this.rotation);
+                ctx.drawImage(this.img, -this.sizeW / 2, -this.sizeH / 2, this.sizeW, this.sizeH);
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, vx, vy) { this.x = x; this.y = y; this.color = color; this.vx = vx; this.vy = vy; this.alpha = 1; }
+            update() { this.vx *= 0.96; this.vy *= 0.96; this.vy += 0.12; this.x += this.vx; this.y += this.vy; this.alpha -= 0.015; }
+            draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        }
+
+        function init() {
+            resize();
+            for (let i = 0; i < 40; i++) moneyParticles.push(new Money());
+            animate();
+            drawWheel();
+        }
+
+        function animate() {
+            ctx.fillStyle = 'black'; ctx.fillRect(0, 0, width, height);
+            moneyParticles.forEach(m => { m.update(); m.draw(); });
+            if (Math.random() < 0.03) createFirework(Math.random() * width, Math.random() * height * 0.5);
+            fireworks = fireworks.filter(p => p.alpha > 0);
+            fireworks.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#FFD700', '#FFFFFF', '#FF3300', '#00FFCC'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 80; i++) {
+                const ang = Math.random() * Math.PI * 2; const spd = Math.random() * 6 + 2;
+                fireworks.push(new Particle(x, y, color, Math.cos(ang) * spd, Math.sin(ang) * spd));
+            }
+        }
+
+        function createSpecialFirework() {
+            for (let i = 0; i < 6; i++) { setTimeout(() => createFirework(Math.random() * width, Math.random() * height * 0.4), i * 200); }
+        }
+
+        // --- Lucky Wheel System ---
+        const wCanvas = document.getElementById('wheel-canvas');
+        const wCtx = wCanvas.getContext('2d');
+        const prizes = ["5,000 kip", "20,000 kip", "50,000 kip", "100,000 kip", "500,000 kip", "5,000,000 kip", "20,000,000 kip", "iphone 15 pro max", "Iphone 17 pro max", "Toyota car", "Try more again", "Thank you"];
+        const wheelColors = ["#d4af37", "#111", "#d4af37", "#111", "#d4af37", "#111", "#d4af37", "#111", "#d4af37", "#111", "#d4af37", "#111"];
+        let startAngle = 0;
+        let arc = Math.PI / (prizes.length / 2);
+        let isSpinning = false;
+
+        function drawWheel() {
+            wCtx.clearRect(0, 0, 500, 500);
+            for (let i = 0; i < prizes.length; i++) {
+                let angle = startAngle + i * arc;
+                wCtx.fillStyle = wheelColors[i];
+                wCtx.beginPath(); wCtx.arc(250, 250, 240, angle, angle + arc, false); wCtx.lineTo(250, 250); wCtx.fill();
+                wCtx.strokeStyle = "#bf953f"; wCtx.stroke();
+                wCtx.save();
+                wCtx.fillStyle = wheelColors[i] === "#111" ? "#d4af37" : "white";
+                wCtx.translate(250 + Math.cos(angle + arc / 2) * 170, 250 + Math.sin(angle + arc / 2) * 170);
+                wCtx.rotate(angle + arc / 2 + Math.PI / 2);
+                wCtx.font = 'bold 12px Arial';
+                wCtx.fillText(prizes[i], -wCtx.measureText(prizes[i]).width / 2, 0);
+                wCtx.restore();
+            }
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            const spinRounds = 5 + Math.random() * 2;
+            const totalDegree = (spinRounds * 360) + Math.random() * 360;
+            const duration = 5000;
+            const startTime = performance.now();
+            function animateWheel(now) {
+                let elapsed = now - startTime;
+                let progress = elapsed / duration;
+                let easeOut = 1 - Math.pow(1 - progress, 3);
+                if (progress < 1) {
+                    startAngle = (totalDegree * easeOut) * (Math.PI / 180);
+                    drawWheel(); requestAnimationFrame(animateWheel);
+                } else { isSpinning = false; finishSpin(); }
+            }
+            requestAnimationFrame(animateWheel);
+        }
+
+        function finishSpin() {
+            let degrees = (startAngle * 180 / Math.PI) + 90;
+            let index = Math.floor((360 - degrees % 360) / (arc * 180 / Math.PI));
+            if (index < 0) index += prizes.length;
+            document.getElementById('prize-text').innerText = prizes[index];
+            document.getElementById('prize-modal').classList.add('show');
+            createSpecialFirework();
+        }
+
+        function closeModal() { document.getElementById('prize-modal').classList.remove('show'); }
+    </script>
+</body>
+
+</html>
